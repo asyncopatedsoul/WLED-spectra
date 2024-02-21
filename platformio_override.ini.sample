@@ -5,19 +5,32 @@
 # Please visit documentation: https://docs.platformio.org/page/projectconf.html
 
 [platformio]
-default_envs = WLED_tasmota_1M
+default_envs = atoms3_4MB
 
-[env:WLED_tasmota_1M]
-board = esp01_1m
-platform = ${common.platform_wled_default}
-platform_packages = ${common.platform_packages}
-board_build.ldscript = ${common.ldscript_1m128k}
-lib_deps = ${esp8266.lib_deps}
+[env:atoms3_4MB]
+;; compatible build with M5Stack AtomS3 - https://docs.platformio.org/en/latest/boards/espressif32/m5stack-atoms3.html
+board = esp32-s3-devkitc-1
+platform = ${esp32s3.platform}
+platform_packages = ${esp32s3.platform_packages}
+upload_speed = 921600 ; or  460800
+lib_deps = ${esp32s3.lib_deps}
+board_build.partitions = tools/WLED_ESP32_4MB_1MB_FS.csv
+board_build.f_flash = 80000000L
+board_build.flash_mode = qio
+; board_build.flash_mode = dio   ;; try this if you have problems at startup
+monitor_filters = esp32_exception_decoder
 build_unflags = ${common.build_unflags}
-build_flags = ${common.build_flags_esp8266}
+build_flags = ${common.build_flags} ${esp32s3.build_flags} -D WLED_RELEASE_NAME=ESP32-S3_4MB
+  -D CONFIG_LITTLEFS_FOR_IDF_3_2 -D WLED_WATCHDOG_TIMEOUT=0
+  -D ARDUINO_USB_CDC_ON_BOOT=0  ;; -D ARDUINO_USB_MODE=1 ;; for boards with serial-to-USB chip
+  ;-D ARDUINO_USB_CDC_ON_BOOT=1 ;; -D ARDUINO_USB_MODE=1 ;; for boards with USB-OTG connector only (USBCDC or "TinyUSB")
+  -D LEDPIN=1
+  -D DEFAULT_LED_COUNT=16 
+  -D CLIENT_SSID="\"YOURLOCALWIFISSID\"" -D CLIENT_PASS="\"YOURLOCALWIFIPASS\""
+  ;-D WLED_DEBUG
 ; *********************************************************************
 ; *** Use custom settings from file my_config.h
-   -DWLED_USE_MY_CONFIG
+;    -DWLED_USE_MY_CONFIG
 ; *********************************************************************
 ;
 ;
@@ -41,8 +54,8 @@ build_flags = ${common.build_flags_esp8266}
 ;   -D USE_WS2801
 ;   -D USE_LPD8806
 ; PIN defines for 2 wire LEDs
-   -D CLKPIN=0
-   -D DATAPIN=2
+;    -D CLKPIN=0
+;    -D DATAPIN=2
 ; to drive analog LED strips (aka 5050) hardware configuration is no longer necessary
 ; configure the settings in the UI as follows (hard):
 ;   for the Magic Home LED Controller use PWM pins 5,12,13,15
