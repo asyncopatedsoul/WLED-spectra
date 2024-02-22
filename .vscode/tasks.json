@@ -37,6 +37,48 @@
       "presentation": {
         "panel": "shared"
       }
+    },
+    {
+      "label": "Upload Firmware Debug",
+      "type": "shell",
+      "command": "pio",
+      "args": [
+          "run",
+          "-e",
+          "atoms3_4MB_debug",
+          "-t",
+          "upload"
+      ],
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      },
+      "presentation": {
+          "reveal": "silent",
+          "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Upload Firmware",
+      "type": "shell",
+      "command": "pio",
+      "args": [
+          "run",
+          "-e",
+          "atoms3_4MB",
+          "-t",
+          "upload"
+      ],
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      },
+      "presentation": {
+          "reveal": "silent",
+          "panel": "new"
+      },
+      "problemMatcher": []
     }
   ]
 }
