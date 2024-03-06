@@ -42,6 +42,12 @@ static int esp_now_state = ESP_NOW_STATE_UNINIT;
 static uint32_t last_seq = UINT32_MAX;
 static int brightnessBeforeNightMode = NIGHT_MODE_DEACTIVATED;
 static message_structure incoming;
+message_structure outgoing;
+esp_now_peer_info_t peerInfo;
+
+// REPLACE WITH YOUR RECEIVER MAC Address
+// uint8_t broadcastAddress[] = {0xF4, 0x12, 0xFA, 0xA0, 0x20, 0x78};
+uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 // Pulled from the IR Remote logic but reduced to 10 steps with a constant of 3
 static const byte brightnessSteps[] = {
@@ -115,6 +121,12 @@ static void presetWithFallback(uint8_t presetID, uint8_t effectID, uint8_t palet
   applyPresetWithFallback(presetID, CALL_MODE_BUTTON_PRESET, effectID, paletteID);
 }
  
+// Callback function that will be executed when data is sent
+void OnDataSent(const uint8_t * mac, esp_now_send_status_t status) {
+  DEBUG_PRINT(F("\r\nLast Packet Send Status:\t"));
+  DEBUG_PRINTLN(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+}
+
 // Callback function that will be executed when data is received
 #ifdef ESP8266
 void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
@@ -128,7 +140,8 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   if (strcmp(last_signal_src, linked_remote) != 0) {
     DEBUG_PRINT(F("ESP Now Message Received from Unlinked Sender: "));
     DEBUG_PRINTLN(last_signal_src);
-    return;
+    // accept messages from any sender for now
+    // return;
   }
 
   if (len != sizeof(incoming)) {
@@ -182,8 +195,42 @@ void handleRemote() {
       esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
       #endif
       
+      // Once ESPNow is successfully Init, we will register for recv CB to
+      // get recv packer info
       esp_now_register_recv_cb(OnDataRecv);
+      
+      // Once ESPNow is successfully Init, we will register for Send CB to
+      // get the status of Transmitted packet
+      esp_now_register_send_cb(OnDataSent);
+      // Register peer
+      memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+      peerInfo.channel = 0;  
+      peerInfo.encrypt = false;
+      // Add peer        
+      if (esp_now_add_peer(&peerInfo) != ESP_OK){
+        DEBUG_PRINTLN(F("Failed to add peer"));
+        return;
+      }
+
       esp_now_state = ESP_NOW_STATE_ON;
+
+      // Set values to send
+      // memcpy(&(outgoing.program), (const void*)0x81, sizeof(outgoing));
+      // hardcoding remote button for now
+      outgoing.button = WIZMOTE_BUTTON_TWO;
+
+      // Send message via ESP-NOW
+      DEBUG_PRINTLN(F("Send message via ESP-NOW"));
+      // ESP Now Message Received from Unlinked Sender: f412faa02078
+      esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &outgoing, sizeof(outgoing));
+      
+      if (result == ESP_OK) {
+        DEBUG_PRINTLN(F("Sent with success"));
+      }
+      else {
+        DEBUG_PRINTLN(F("Error sending the data"));
+      }
+      delay(2000);
     }
   } else {
     if (esp_now_state == ESP_NOW_STATE_ON) {

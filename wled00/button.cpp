@@ -59,6 +59,9 @@ void longPressAction(uint8_t b)
 
 void doublePressAction(uint8_t b)
 {
+  DEBUG_PRINTF("\n\n\npush button doublePressAction...%d\n\n\n",b);
+  handleRemote();
+
   if (!macroDoublePress[b]) {
     switch (b) {
       //case 0: toggleOnOff(); colorUpdated(CALL_MODE_BUTTON); break; //instant short press on button 0 if no macro set
@@ -257,7 +260,6 @@ void handleButton()
 
     // momentary button logic
     if (isButtonPressed(b)) { // pressed
-
       // if all macros are the same, fire action immediately on rising edge
       if (macroButton[b] && macroButton[b] == macroLongPress[b] && macroButton[b] == macroDoublePress[b]) {
         if (!buttonPressedBefore[b])
