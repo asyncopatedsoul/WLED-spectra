@@ -21,6 +21,31 @@
 #define SENDER_BUTTON_BRIGHT_UP   9
 #define SENDER_BUTTON_BRIGHT_DOWN 8
 
+const char* get_sender_button_name(uint8_t b) {
+    switch (b) {
+        case SENDER_BUTTON_ON:
+            return "SENDER_BUTTON_ON";
+        case SENDER_BUTTON_OFF:
+            return "SENDER_BUTTON_OFF";
+        case SENDER_BUTTON_NIGHT:
+            return "SENDER_BUTTON_NIGHT";
+        case SENDER_BUTTON_ONE:
+            return "SENDER_BUTTON_ONE";
+        case SENDER_BUTTON_TWO:
+            return "SENDER_BUTTON_TWO";
+        case SENDER_BUTTON_THREE:
+            return "SENDER_BUTTON_THREE";
+        case SENDER_BUTTON_FOUR:
+            return "SENDER_BUTTON_FOUR";
+        case SENDER_BUTTON_BRIGHT_UP:
+            return "SENDER_BUTTON_BRIGHT_UP";
+        case SENDER_BUTTON_BRIGHT_DOWN:
+            return "SENDER_BUTTON_BRIGHT_DOWN";
+        default:
+            return "Unknown Button";
+    }
+}
+
 typedef struct message_structure_outgoing {
   uint8_t program;      // 0x91 for ON button, 0x81 for all others
   uint8_t seq[4];       // Incremental sequence number 32 bit unsigned integer LSB first
@@ -64,7 +89,9 @@ void shortPressAction(uint8_t b)
   increment_sequence(&out);
   out.button = SENDER_BUTTON_ONE;
   // Send message via ESP-NOW
-  DEBUG_PRINTLN(F("Send message via ESP-NOW:"));
+  const char* buttonName = get_sender_button_name(out.button); // Get the button name
+  DEBUG_PRINTF("\nSend %s via ESP-NOW\n", buttonName);
+
   esp_err_t result = esp_now_send(broadcastAddress_outgoing, (uint8_t *) &out, sizeof(out));
   if (result == ESP_OK) {
     DEBUG_PRINTLN(F("Sent with success"));
@@ -99,7 +126,8 @@ void longPressAction(uint8_t b)
   increment_sequence(&out);
   out.button = SENDER_BUTTON_TWO;
   // Send message via ESP-NOW
-  DEBUG_PRINTLN(F("Send message via ESP-NOW:"));
+  const char* buttonName = get_sender_button_name(out.button); // Get the button name
+  DEBUG_PRINTF("\nSend %s via ESP-NOW\n", buttonName);
   esp_err_t result = esp_now_send(broadcastAddress_outgoing, (uint8_t *) &out, sizeof(out));
   if (result == ESP_OK) {
     DEBUG_PRINTLN(F("Sent with success"));
@@ -134,7 +162,8 @@ void doublePressAction(uint8_t b)
   increment_sequence(&out);
   out.button = SENDER_BUTTON_THREE;
   // Send message via ESP-NOW
-  DEBUG_PRINTLN(F("Send message via ESP-NOW:"));
+  const char* buttonName = get_sender_button_name(out.button); // Get the button name
+  DEBUG_PRINTF("\nSend %s via ESP-NOW\n", buttonName);
   esp_err_t result = esp_now_send(broadcastAddress_outgoing, (uint8_t *) &out, sizeof(out));
   if (result == ESP_OK) {
     DEBUG_PRINTLN(F("Sent with success"));
