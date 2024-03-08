@@ -42,11 +42,7 @@ static int esp_now_state = ESP_NOW_STATE_UNINIT;
 static uint32_t last_seq = UINT32_MAX;
 static int brightnessBeforeNightMode = NIGHT_MODE_DEACTIVATED;
 static message_structure incoming;
-message_structure outgoing;
 esp_now_peer_info_t peerInfo;
-
-// REPLACE WITH YOUR RECEIVER MAC Address
-// uint8_t broadcastAddress[] = {0xF4, 0x12, 0xFA, 0xA0, 0x20, 0x78};
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 // Pulled from the IR Remote logic but reduced to 10 steps with a constant of 3
@@ -202,6 +198,7 @@ void handleRemote() {
       // Once ESPNow is successfully Init, we will register for Send CB to
       // get the status of Transmitted packet
       esp_now_register_send_cb(OnDataSent);
+
       // Register peer
       memcpy(peerInfo.peer_addr, broadcastAddress, 6);
       peerInfo.channel = 0;  
@@ -213,23 +210,6 @@ void handleRemote() {
       }
 
       esp_now_state = ESP_NOW_STATE_ON;
-
-      // Set values to send
-      // memcpy(&(outgoing.program), (const void*)0x81, sizeof(outgoing));
-      // hardcoding remote button for now
-      outgoing.button = WIZMOTE_BUTTON_TWO;
-
-      // Send message via ESP-NOW
-      DEBUG_PRINTLN(F("Send message via ESP-NOW"));
-      // ESP Now Message Received from Unlinked Sender: f412faa02078
-      esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &outgoing, sizeof(outgoing));
-      
-      if (result == ESP_OK) {
-        DEBUG_PRINTLN(F("Sent with success"));
-      }
-      else {
-        DEBUG_PRINTLN(F("Error sending the data"));
-      }
       delay(2000);
     }
   } else {

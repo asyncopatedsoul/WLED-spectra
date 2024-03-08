@@ -11,10 +11,67 @@
 #define WLED_LONG_AP               5000 // how long button 0 needs to be held to activate WLED-AP
 #define WLED_LONG_FACTORY_RESET   10000 // how long button 0 needs to be held to trigger a factory reset
 
+#define SENDER_BUTTON_ON          1
+#define SENDER_BUTTON_OFF         2
+#define SENDER_BUTTON_NIGHT       3
+#define SENDER_BUTTON_ONE         16
+#define SENDER_BUTTON_TWO         17
+#define SENDER_BUTTON_THREE       18
+#define SENDER_BUTTON_FOUR        19
+#define SENDER_BUTTON_BRIGHT_UP   9
+#define SENDER_BUTTON_BRIGHT_DOWN 8
+
+typedef struct message_structure_outgoing {
+  uint8_t program;      // 0x91 for ON button, 0x81 for all others
+  uint8_t seq[4];       // Incremental sequence number 32 bit unsigned integer LSB first
+  uint8_t byte5 = 32;   // Unknown
+  uint8_t button;       // Identifies which button is being pressed
+  uint8_t byte8 = 1;    // Unknown, but always 0x01
+  uint8_t byte9 = 100;  // Unknown, but always 0x64
+
+  uint8_t byte10;  // Unknown, maybe checksum
+  uint8_t byte11;  // Unknown, maybe checksum
+  uint8_t byte12;  // Unknown, maybe checksum
+  uint8_t byte13;  // Unknown, maybe checksum
+} message_structure_outgoing;
+
+uint8_t broadcastAddress_outgoing[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+message_structure_outgoing out;
+
 static const char _mqtt_topic_button[] PROGMEM = "%s/button/%d";  // optimize flash usage
+
+// increment esp now outgoing message sequence number
+void increment_sequence(message_structure_outgoing *msg) {
+    // Convert the sequence number bytes to a 32-bit unsigned integer
+    uint32_t sequence_number = 0;
+    for (int i = 0; i < 4; i++) {
+        sequence_number |= ((uint32_t)msg->seq[i]) << (8 * i);
+    }
+
+    // Increment the sequence number
+    sequence_number++;
+
+    // Update the sequence number bytes in the struct
+    for (int i = 0; i < 4; i++) {
+        msg->seq[i] = (sequence_number >> (8 * i)) & 0xFF;
+    }
+}
 
 void shortPressAction(uint8_t b)
 {
+  DEBUG_PRINTF("\n\n\npush button shortPressAction...%d\n\n\n",b);
+  out.program = 0x81;
+  increment_sequence(&out);
+  out.button = SENDER_BUTTON_ONE;
+  // Send message via ESP-NOW
+  DEBUG_PRINTLN(F("Send message via ESP-NOW:"));
+  esp_err_t result = esp_now_send(broadcastAddress_outgoing, (uint8_t *) &out, sizeof(out));
+  if (result == ESP_OK) {
+    DEBUG_PRINTLN(F("Sent with success"));
+  } else {
+    DEBUG_PRINTLN(F("Error sending the data"));
+  }
+  
   if (!macroButton[b]) {
     switch (b) {
       case 0: toggleOnOff(); stateUpdated(CALL_MODE_BUTTON); break;
@@ -37,6 +94,19 @@ void shortPressAction(uint8_t b)
 
 void longPressAction(uint8_t b)
 {
+  DEBUG_PRINTF("\n\n\npush button longPressAction...%d\n\n\n",b);
+  out.program = 0x81;
+  increment_sequence(&out);
+  out.button = SENDER_BUTTON_TWO;
+  // Send message via ESP-NOW
+  DEBUG_PRINTLN(F("Send message via ESP-NOW:"));
+  esp_err_t result = esp_now_send(broadcastAddress_outgoing, (uint8_t *) &out, sizeof(out));
+  if (result == ESP_OK) {
+    DEBUG_PRINTLN(F("Sent with success"));
+  } else {
+    DEBUG_PRINTLN(F("Error sending the data"));
+  }
+
   if (!macroLongPress[b]) {
     switch (b) {
       case 0: setRandomColor(col); colorUpdated(CALL_MODE_BUTTON); break;
@@ -60,7 +130,17 @@ void longPressAction(uint8_t b)
 void doublePressAction(uint8_t b)
 {
   DEBUG_PRINTF("\n\n\npush button doublePressAction...%d\n\n\n",b);
-  handleRemote();
+  out.program = 0x81;
+  increment_sequence(&out);
+  out.button = SENDER_BUTTON_THREE;
+  // Send message via ESP-NOW
+  DEBUG_PRINTLN(F("Send message via ESP-NOW:"));
+  esp_err_t result = esp_now_send(broadcastAddress_outgoing, (uint8_t *) &out, sizeof(out));
+  if (result == ESP_OK) {
+    DEBUG_PRINTLN(F("Sent with success"));
+  } else {
+    DEBUG_PRINTLN(F("Error sending the data"));
+  }
 
   if (!macroDoublePress[b]) {
     switch (b) {
