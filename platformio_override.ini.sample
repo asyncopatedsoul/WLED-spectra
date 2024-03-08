@@ -5,7 +5,7 @@
 # Please visit documentation: https://docs.platformio.org/page/projectconf.html
 
 [platformio]
-default_envs = atoms3_4MB
+default_envs = atoms3_4MB_debug
 
 [env:atoms3_4MB]
 ;; compatible build with M5Stack AtomS3 - https://docs.platformio.org/en/latest/boards/espressif32/m5stack-atoms3.html
@@ -25,9 +25,42 @@ build_flags = ${common.build_flags} ${esp32s3.build_flags} -D WLED_RELEASE_NAME=
   -D ARDUINO_USB_CDC_ON_BOOT=0  ;; -D ARDUINO_USB_MODE=1 ;; for boards with serial-to-USB chip
   ;-D ARDUINO_USB_CDC_ON_BOOT=1 ;; -D ARDUINO_USB_MODE=1 ;; for boards with USB-OTG connector only (USBCDC or "TinyUSB")
   -D LEDPIN=1
-  -D DEFAULT_LED_COUNT=16 
-  -D CLIENT_SSID="\"YOURLOCALWIFISSID\"" -D CLIENT_PASS="\"YOURLOCALWIFIPASS\""
-  ;-D WLED_DEBUG
+  -D DEFAULT_LED_COUNT=256 
+  -D CLIENT_SSID="\"YOUR_LOCAL_WIFI_SSID\"" -D CLIENT_PASS="\"YOUR_LOCAL_WIFI_PASS\""
+
+[env:atoms3_4MB_debug]
+;; compatible build with M5Stack AtomS3 - https://docs.platformio.org/en/latest/boards/espressif32/m5stack-atoms3.html
+board = esp32-s3-devkitc-1
+platform = ${esp32s3.platform}
+platform_packages = ${esp32s3.platform_packages}
+upload_speed = 921600 ; or  460800
+lib_deps = ${esp32s3.lib_deps}
+board_build.partitions = tools/WLED_ESP32_4MB_1MB_FS.csv
+board_build.f_flash = 80000000L
+board_build.flash_mode = qio
+; board_build.flash_mode = dio   ;; try this if you have problems at startup
+monitor_filters = esp32_exception_decoder
+build_unflags = ${common.build_unflags}
+build_type = debug
+build_flags = ${common.build_flags} ${esp32s3.build_flags} -D WLED_RELEASE_NAME=ESP32-S3_4MB_DEBUG
+  -D CONFIG_LITTLEFS_FOR_IDF_3_2 -D WLED_WATCHDOG_TIMEOUT=0
+  -D ARDUINO_USB_CDC_ON_BOOT=0  ;; -D ARDUINO_USB_MODE=1 ;; for boards with serial-to-USB chip
+  ;-D ARDUINO_USB_CDC_ON_BOOT=1 ;; -D ARDUINO_USB_MODE=1 ;; for boards with USB-OTG connector only (USBCDC or "TinyUSB")
+  -D LEDPIN=1
+  -D DEFAULT_LED_COUNT=256 
+  -D CLIENT_SSID="\"YOUR_LOCAL_WIFI_SSID\"" -D CLIENT_PASS="\"YOUR_LOCAL_WIFI_PASS\""
+  -D WLED_DEBUG
+  -D WLED_DEBUG_HOST='"YOUR_DEBUG_RECEIVER_IP"'
+  ; receiver
+  ; -D WLED_DEBUG_PORT=7868
+  ; sender
+  -D WLED_DEBUG_PORT=7869
+  -D WLED_DISABLE_OTA
+  -D WLED_DISABLE_ALEXA
+  -D WLED_DISABLE_HUESYNC
+  -D WLED_DISABLE_INFRARED
+  -D WLED_DISABLE_WEBSOCKETS
+  -D BTNPIN=41
 ; *********************************************************************
 ; *** Use custom settings from file my_config.h
 ;    -DWLED_USE_MY_CONFIG
