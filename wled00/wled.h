@@ -185,7 +185,7 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 #endif
 
 #ifndef CLIENT_PASS
-  #define CLIENT_PASS ""
+  #define CLIENT_PASS DEFAULT_CLIENT_PASS
 #endif
 
 #ifndef MDNS_NAME

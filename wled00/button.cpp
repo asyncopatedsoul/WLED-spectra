@@ -226,6 +226,8 @@ void handleAnalog(uint8_t b)
 
 void handleButton()
 {
+  // DEBUG_PRINTLN(">>> HANDLE BUTTON");
+
   static unsigned long lastAnalogRead = 0UL;
   static unsigned long lastRun = 0UL;
   unsigned long now = millis();
@@ -257,7 +259,12 @@ void handleButton()
 
     // momentary button logic
     if (isButtonPressed(b)) { // pressed
+<<<<<<< Updated upstream
 
+=======
+      // DEBUG_PRINTLN(">>> isButtonPressed");
+      DEBUG_PRINTLN(b);
+>>>>>>> Stashed changes
       // if all macros are the same, fire action immediately on rising edge
       if (macroButton[b] && macroButton[b] == macroLongPress[b] && macroButton[b] == macroDoublePress[b]) {
         if (!buttonPressedBefore[b])
@@ -280,7 +287,11 @@ void handleButton()
       }
 
     } else if (!isButtonPressed(b) && buttonPressedBefore[b]) { //released
+
+      DEBUG_PRINTLN(">>> BUTTON RELEASED");
       long dur = now - buttonPressedTime[b];
+      DEBUG_PRINTLN(b);
+      DEBUG_PRINTLN(dur);
 
       // released after rising-edge short press action
       if (macroButton[b] && macroButton[b] == macroLongPress[b] && macroButton[b] == macroDoublePress[b]) {
@@ -354,6 +365,8 @@ void esp32RMTInvertIdle()
 
 void handleIO()
 {
+  // DEBUG_PRINTLN(">>> HANDLE IO");
+
   handleButton();
 
   //set relay when LEDs turn on

@@ -8,8 +8,10 @@
 #define GRADIENT_PALETTE_COUNT 58
 
 //Defaults
-#define DEFAULT_CLIENT_SSID "Your_Network"
-#define DEFAULT_AP_SSID     "WLED-AP"
+#define DEFAULT_CLIENT_SSID "TreeOfLife"
+#define DEFAULT_CLIENT_PASS "3330794365"
+// #define DEFAULT_AP_SSID     "WLED-AP"
+#define DEFAULT_AP_SSID     "WLED-SENDER"
 #define DEFAULT_AP_PASS     "wled1234"
 #define DEFAULT_OTA_PASS    "wledota"
 #define DEFAULT_MDNS_NAME   "x"
